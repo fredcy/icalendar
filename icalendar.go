@@ -4,44 +4,55 @@ import (
 	"strings"
 )
 
-type Property []string
+var crlf = "\r\n"
 
-func (p *Property) String() string {
-	return strings.Join(*p, ",")
+type Value struct {
+	vString string
 }
 
-type Properties map[string]Property
+type Parameter struct {
+	name string
+	value string
+}
+
+type Property struct {
+	name string
+	value string
+	parameters []Parameter
+}
+
+type Properties []Property
 
 type Component struct {
 	name string
 	properties Properties
+	components []Component
+}
+
+func (properties Properties) String() string {
+	return "dummy"
 }
 
 func (c *Component) String() string {
-	s := "BEGIN:" + c.name + "\n"
-	for k, v := range c.properties {
-		s += k + ":" + v.String() + "\n"
+	s := "BEGIN:" + c.name + crlf
+	for _, prop := range c.properties {
+		s += strings.ToUpper(prop.name) + ":" + prop.value + crlf
 	}
-	s += "END:" + c.name + "\n"
+	for _, subc := range c.components {
+		s += subc.String()
+	}
+	s += "END:" + c.name + crlf
 	return s
 }
 
 func (c *Component) Add(name, value string) {
-	if c.properties == nil {
-		c.properties = make(Properties)
-	}
-	c.properties[name] = Property{value}
+	c.properties = append(c.properties, Property{name: name, value: value})
 }
 
 func (c *Component) Set(name, value string) {
-	if c.properties == nil {
-		c.properties = make(Properties)
-	}
-	c.properties[name] = Property{value}
+	c.Add(name, value)			// TODO: remove duplicates
 }
 
-type Vevent struct {
-	Component
+func (c *Component) AddComponent(subc *Component) {
+	c.components = append(c.components, *subc)
 }
-
-
