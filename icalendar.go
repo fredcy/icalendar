@@ -5,19 +5,29 @@ type Field struct {
 	value string
 }
 
-type Vevent struct {
-	components []Field
+type Component struct {
+	name string
+	properties map[string]string
 }
 
-func (e *Vevent) String() string {
-	s := "BEGIN:VEVENT\n"
-	for _, c := range e.components {
-		s += c.name + ":" + c.value + "\n"
+func (c *Component) String() string {
+	s := "BEGIN:" + c.name + "\n"
+	for k, v := range c.properties {
+		s += k + ":" + v + "\n"
 	}
-	s += "END:VEVENT\n"
+	s += "END:" + c.name + "\n"
 	return s
 }
 
-func (e *Vevent) Add(f Field) {
-	e.components = append(e.components, f)
+func (c *Component) Add(name, value string) {
+	if c.properties == nil {
+		c.properties = make(map[string]string)
+	}
+	c.properties[name] = value
 }
+
+type Vevent struct {
+	Component
+}
+
+
