@@ -3,6 +3,7 @@ package icalendar
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 func MustEqual(t *testing.T, got, want string) {
@@ -12,7 +13,7 @@ func MustEqual(t *testing.T, got, want string) {
 }
 
 func Join(lines []string) string {
-	return strings.Join(lines, crlf) + crlf
+	return strings.Join(lines, CrLf) + CrLf
 }
 
 func TestVevent(t *testing.T) {
@@ -42,3 +43,23 @@ func TestSubComponents(t *testing.T) {
 		Join([]string{"BEGIN:VTIMEZONE", "TZID:America/Chicago", "BEGIN:DAYLIGHT",
 			"TZNAME:CDT", "END:DAYLIGHT", "END:VTIMEZONE"}))
 }
+
+func TestDates(t *testing.T) {
+	td := time.Date(2008, time.April, 1, 0, 0, 0, 0, time.UTC)
+	vd := VDate(td)
+	MustEqual(t, vd.String(), "20080401")
+
+	uo := VUtcOffset(-(5*3600+30*60))
+	MustEqual(t, uo.String(), "-0530")
+
+	uo = VUtcOffset((8*3600))
+	MustEqual(t, uo.String(), "0800")
+}
+
+func TestDtstart(t *testing.T) {
+	dt := time.Date(1970, 11, 1, 2, 0, 0, 0, time.UTC)
+	ds := Property{ name: "DTSTART", value: VDateTime(dt) }
+	ds.AddParameter("VALUE", VString("DATE-TIME"))
+	MustEqual(t, ds.String(), "DTSTART;VALUE=DATE-TIME:19701101T020000")
+}
+

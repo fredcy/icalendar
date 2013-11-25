@@ -1,11 +1,13 @@
 package icalendar
 
 import (
+	"fmt"
+	"log"
 	"strings"
 	"time"
 )
 
-var crlf = "\r\n"
+const CrLf = "\r\n"
 
 type Name string
 func (n *Name) String() string { return strings.ToUpper(string(*n)) }
@@ -18,12 +20,48 @@ type VString string
 func (s VString) String() string { return string(s) }
 
 type VDate time.Time
-var datelayout = "20060102"
+const datelayout = "20060102"
 func (d VDate) String() string { return time.Time(d).Format(datelayout) }
+
+type VDateTime time.Time
+const datetimelayout = "20060102T150405"
+func (d VDateTime) String() string { return time.Time(d).Format(datetimelayout) }
+
+func abs(i int) int {
+	if i < 0 {
+		return -i
+	}
+	return i
+}
+
+func hms(i int) (int, int, int) {
+	hours := i / 3600
+	minutes := (i % 3600) / 60
+	seconds := i % 60
+	return hours, minutes, seconds
+}
+
+type VUtcOffset int				// seconds east of UTC
+
+func (u VUtcOffset) String() string {
+	ua := abs(int(u))
+	hours, minutes, seconds := hms(ua)
+	if seconds != 0 {
+		log.Printf("seconds (%v) not zero in VUtcOffset value (%v)", seconds, int(u))
+	}
+	if int(u) >= 0 {
+		return fmt.Sprintf("%2.2d%2.2d", hours, minutes)
+	} else {
+		return fmt.Sprintf("-%2.2d%2.2d", hours, minutes)
+	}
+}
 
 type Parameter struct {
 	name Name
 	value Value
+}
+func (param Parameter) String() string {
+	return param.name.String() + "=" + param.value.String()
 }
 
 type Property struct {
@@ -32,27 +70,32 @@ type Property struct {
 	parameters []Parameter
 }
 
-type Properties []Property
+func (prop Property) String() string {
+	var params string
+	for _, param := range prop.parameters {
+		params += (";" + param.String())
+	}
+	return prop.name.String() + params + ":" + prop.value.String()
+}
+func (prop *Property) AddParameter(name Name, value Value) {
+	prop.parameters = append(prop.parameters, Parameter{name, value})
+}
 
 type Component struct {
 	name Name
-	properties Properties
+	properties []Property
 	components []Component
 }
 
-func (properties Properties) String() string {
-	return "dummy TODO"
-}
-
 func (c *Component) String() string {
-	s := "BEGIN:" + c.name.String() + crlf
+	s := "BEGIN:" + c.name.String() + CrLf
 	for _, prop := range c.properties {
-		s += prop.name.String() + ":" + prop.value.String() + crlf
+		s += prop.String() + CrLf
 	}
 	for _, subc := range c.components {
 		s += subc.String()
 	}
-	s += "END:" + c.name.String() + crlf
+	s += "END:" + c.name.String() + CrLf
 	return s
 }
 
