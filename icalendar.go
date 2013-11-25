@@ -3,6 +3,7 @@ package icalendar
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -26,6 +27,18 @@ func (d VDate) String() string { return time.Time(d).Format(datelayout) }
 type VDateTime time.Time
 const datetimelayout = "20060102T150405"
 func (d VDateTime) String() string { return time.Time(d).Format(datetimelayout) }
+
+type VInt int
+func (i VInt) String() string { return strconv.Itoa(int(i)) }
+
+type VList []Value
+func (vl VList) String() string {
+	var vls []string
+	for _, v := range vl {
+		vls = append(vls, v.String())
+	}
+	return strings.Join(vls, ",")
+}
 
 func abs(i int) int {
 	if i < 0 {
@@ -71,12 +84,16 @@ type Property struct {
 }
 
 func (prop Property) String() string {
-	var params string
+	s := prop.name.String()
 	for _, param := range prop.parameters {
-		params += (";" + param.String())
+		s += (";" + param.String())
 	}
-	return prop.name.String() + params + ":" + prop.value.String()
+	if prop.value != nil {
+		s += (":" + prop.value.String())
+	}
+	return s
 }
+
 func (prop *Property) AddParameter(name Name, value Value) {
 	prop.parameters = append(prop.parameters, Parameter{name, value})
 }

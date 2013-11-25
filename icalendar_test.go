@@ -63,3 +63,26 @@ func TestDtstart(t *testing.T) {
 	MustEqual(t, ds.String(), "DTSTART;VALUE=DATE-TIME:19701101T020000")
 }
 
+func TestRrule(t *testing.T) {
+	rr := Property{ name: "RRULE" }
+	rr.AddParameter("FREQ", VString("YEARLY"))
+	rr.AddParameter("BYDAY", VString("1SU"))
+	rr.AddParameter("BYMONTH", VInt(11))
+	MustEqual(t, rr.String(), "RRULE;FREQ=YEARLY;BYDAY=1SU;BYMONTH=11")
+
+	// alternatively, set the parameters with a literal [so clumsy]
+	r2 := Property{ name: "RRULE",
+		parameters: []Parameter{
+			{"FREQ", VString("YEARLY") },
+			{"BYDAY", VString("2SU") },
+			{"BYMONTH", VInt(3)},
+		},
+	}
+	MustEqual(t, r2.String(), "RRULE;FREQ=YEARLY;BYDAY=2SU;BYMONTH=3")
+}
+
+func TestVList(t *testing.T) {
+	p := Property{ name: "FOO" }
+	p.AddParameter("BAR", VList{VInt(11), VInt(12)})
+	MustEqual(t, p.String(), "FOO;BAR=11,12")
+}
