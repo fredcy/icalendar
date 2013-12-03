@@ -85,4 +85,28 @@ func TestVList(t *testing.T) {
 	p := Property{ name: "FOO" }
 	p.AddParameter("BAR", VList{VInt(11), VInt(12)})
 	MustEqual(t, p.String(), "FOO;BAR=11,12")
+
+	v2 := VEnumList{}
+	v2.AddValue("FREQ", VString("YEARLY"))
+	v2.AddValue("BYMONTH", VInt(4))
+	p2 := NewProperty("foo2", v2)
+	MustEqual(t, p2.String(), "FOO2:FREQ=YEARLY;BYMONTH=4")
+}
+
+func TestName(t *testing.T) {
+	c := Component{}
+	c.SetName("blatz")
+	MustEqual(t, c.name.String(), "BLATZ")
+}
+
+func TestProperty(t *testing.T) {
+	p := NewProperty("thename", VString("thevalue"))
+	p.AddParameter("P1", VString("foo"))
+	MustEqual(t, p.name.String(), "THENAME")
+	MustEqual(t, p.String(), "THENAME;P1=foo:thevalue")
+}
+
+func TestVStringf(t *testing.T) {
+	v := VStringf("%s %d", "foo", 3)
+	MustEqual(t, v.String(), "foo 3")
 }
