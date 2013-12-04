@@ -110,3 +110,17 @@ func TestVStringf(t *testing.T) {
 	v := VStringf("%s %d", "foo", 3)
 	MustEqual(t, v.String(), "foo 3")
 }
+
+func TestVDuration(t *testing.T) {
+	v := VDuration(35 * time.Minute)
+	MustEqual(t, v.String(), "PT35M")
+
+	v = VDuration(time.Hour)
+	MustEqual(t, v.String(), "PT1H")
+
+	v = VDuration(24 * time.Hour)
+	MustEqual(t, v.String(), "P1D")
+
+	v = VDuration(27 * time.Hour + 30 * time.Minute + 15 * time.Second)
+	MustEqual(t, v.String(), "P1DT3H30M15S")
+}

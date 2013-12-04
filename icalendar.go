@@ -101,6 +101,34 @@ func (u VUtcOffset) String() string {
 	}
 }
 
+type VDuration time.Duration
+
+func (vd VDuration) String() string {
+	day := time.Hour * 24
+	d := time.Duration(vd)
+	days := d / day
+	hours := d % day / time.Hour
+	minutes := d % time.Hour / time.Minute
+	seconds := d % time.Minute / time.Second
+	s := "P"
+	if days != 0 {
+		s += (strconv.Itoa(int(days)) + "D")
+	}
+	if hours != 0 || minutes != 0 || seconds != 0 {
+		s += "T"
+	}
+	if hours != 0 {
+		s += (strconv.Itoa(int(hours)) + "H")
+	}
+	if minutes != 0 {
+		s += (strconv.Itoa(int(minutes)) + "M")
+	}
+	if seconds != 0 {
+		s += (strconv.Itoa(int(seconds)) + "S")
+	}
+	return s
+}
+
 type Parameter struct {
 	name Name
 	value Value
