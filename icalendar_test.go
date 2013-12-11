@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func MustEqual(t *testing.T, got, want string) {
+func MustEqual(t *testing.T, got, want interface{}) {
 	if want != got {
 		t.Errorf("want <<%v>>, got <<%v>>", want, got)
 	}
@@ -97,6 +97,14 @@ func TestName(t *testing.T) {
 	c := Component{}
 	c.SetName("blatz")
 	MustEqual(t, c.name.String(), "BLATZ")
+}
+
+func TestCount(t *testing.T) {
+	c := Component{}
+	c.AddComponent(&Component{})
+	MustEqual(t, c.ComponentCount(), 1)
+	c.AddComponent(&Component{})
+	MustEqual(t, c.ComponentCount(), 2)
 }
 
 func TestProperty(t *testing.T) {

@@ -199,3 +199,7 @@ func (c *Component) AddProperty(prop Property) {
 func (c *Component) AddComponent(subc *Component) {
 	c.components = append(c.components, *subc)
 }
+
+func (c *Component) ComponentCount() int {
+	return len(c.components)
+}
