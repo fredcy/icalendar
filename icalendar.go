@@ -25,7 +25,23 @@ type Value interface {
 
 // VString is a Value for strings
 type VString string
-func (s VString) String() string { return string(s) }
+
+// Return string representation of icalendar text. See section 4.3.11
+// of RFC 2445
+func (s VString) String() string {
+	trans := [][]string {
+		{ "\\", `\\` },
+		{ "\n", `\n` },
+		{ ",", `\,` },
+		{ ";", `\;` },
+	}
+	str := string(s)
+	for _, t := range trans {
+		from, to := t[0], t[1]
+		str = strings.Replace(str, from, to, -1)
+	}
+	return str
+}
 
 // VStringf generates a VString from format and args
 func VStringf(format string, args ...interface{}) VString {
@@ -79,6 +95,7 @@ func abs(i int) int {
 	return i
 }
 
+// Parse numeric time (HHMMSS) into hours, minutes, and seconds
 func hms(i int) (int, int, int) {
 	hours := i / 3600
 	minutes := (i % 3600) / 60
@@ -143,6 +160,17 @@ type Property struct {
 	parameters []Parameter
 }
 
+// Fold a string per RFC 2445 section 4.1 (Content Lines)
+func Fold(s string, maxlen int) string {
+	var r string
+	for len(s) > maxlen {
+		r += s[:maxlen] + CrLf + " "
+		s = s[maxlen:]
+	}
+	r += s
+	return r
+}
+
 func (prop Property) String() string {
 	s := prop.name.String()
 	for _, param := range prop.parameters {
@@ -171,7 +199,7 @@ type Component struct {
 func (c *Component) String() string {
 	s := "BEGIN:" + c.name.String() + CrLf
 	for _, prop := range c.properties {
-		s += prop.String() + CrLf
+		s += Fold(prop.String(), 75) + CrLf
 	}
 	for _, subc := range c.components {
 		s += subc.String()

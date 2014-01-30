@@ -1,6 +1,7 @@
 package icalendar
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -8,7 +9,9 @@ import (
 
 func MustEqual(t *testing.T, got, want interface{}) {
 	if want != got {
-		t.Errorf("want <<%v>>, got <<%v>>", want, got)
+		twant := reflect.TypeOf(want)
+		tgot := reflect.TypeOf(got)
+		t.Errorf("want <<%v>> (%v), got <<%v>> (%v)", want, twant, got, tgot)
 	}
 }
 
@@ -132,3 +135,21 @@ func TestVDuration(t *testing.T) {
 	v = VDuration(27 * time.Hour + 30 * time.Minute + 15 * time.Second)
 	MustEqual(t, v.String(), "P1DT3H30M15S")
 }
+
+func TestString(t *testing.T) {
+	MustEqual(t, VString("foo").String(), "foo")
+	MustEqual(t, VStringf("foo %s", "bar").String(), "foo bar")
+	MustEqual(t, VString("foo\nbar").String(), `foo\nbar`)
+	MustEqual(t, VString(`a\b`).String(), `a\\b`)
+	MustEqual(t, VString(`;,`).String(), `\;\,`)
+}
+
+func TestFold(t *testing.T) {
+	MustEqual(t, Fold("foo", 75), "foo")
+	MustEqual(t, Fold("foo", 3), "foo")
+	MustEqual(t, Fold("foob", 3), "foo\r\n b")
+	MustEqual(t, Fold("1234567890", 6), "123456\r\n 7890")
+	MustEqual(t, Fold("1234567890", 4), "1234\r\n 5678\r\n 90")
+}
+
+
