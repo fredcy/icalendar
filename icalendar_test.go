@@ -62,31 +62,21 @@ func TestDates(t *testing.T) {
 func TestDtstart(t *testing.T) {
 	dt := time.Date(1970, 11, 1, 2, 0, 0, 0, time.UTC)
 	ds := Property{ name: "DTSTART", value: VDateTime(dt) }
-	ds.AddParameter("VALUE", VString("DATE-TIME"))
+	ds.Add("VALUE", VString("DATE-TIME"))
 	MustEqual(t, ds.String(), "DTSTART;VALUE=DATE-TIME:19701101T020000")
 }
 
 func TestRrule(t *testing.T) {
 	rr := Property{ name: "RRULE" }
-	rr.AddParameter("FREQ", VString("YEARLY"))
-	rr.AddParameter("BYDAY", VString("1SU"))
-	rr.AddParameter("BYMONTH", VInt(11))
+	rr.Add("FREQ", VString("YEARLY"))
+	rr.Add("BYDAY", VString("1SU"))
+	rr.Add("BYMONTH", VInt(11))
 	MustEqual(t, rr.String(), "RRULE;FREQ=YEARLY;BYDAY=1SU;BYMONTH=11")
-
-	// alternatively, set the parameters with a literal [so clumsy]
-	r2 := Property{ name: "RRULE",
-		parameters: []Parameter{
-			{"FREQ", VString("YEARLY") },
-			{"BYDAY", VString("2SU") },
-			{"BYMONTH", VInt(3)},
-		},
-	}
-	MustEqual(t, r2.String(), "RRULE;FREQ=YEARLY;BYDAY=2SU;BYMONTH=3")
 }
 
 func TestVList(t *testing.T) {
 	p := Property{ name: "FOO" }
-	p.AddParameter("BAR", VList{VInt(11), VInt(12)})
+	p.Add("BAR", VList{VInt(11), VInt(12)})
 	MustEqual(t, p.String(), "FOO;BAR=11,12")
 
 	v2 := VEnumList{}
@@ -112,7 +102,7 @@ func TestCount(t *testing.T) {
 
 func TestProperty(t *testing.T) {
 	p := NewProperty("thename", VString("thevalue"))
-	p.AddParameter("P1", VString("foo"))
+	p.Add("P1", VString("foo"))
 	MustEqual(t, p.name.String(), "THENAME")
 	MustEqual(t, p.String(), "THENAME;P1=foo:thevalue")
 }

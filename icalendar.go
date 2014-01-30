@@ -157,7 +157,7 @@ func (param Parameter) String() string {
 type Property struct {
 	name Name
 	value Value
-	parameters []Parameter
+	parameters []*Parameter
 }
 
 // Fold a string per RFC 2445 section 4.1 (Content Lines)
@@ -182,8 +182,12 @@ func (prop Property) String() string {
 	return s
 }
 
-func (prop *Property) AddParameter(name Name, value Value) {
-	prop.parameters = append(prop.parameters, Parameter{name, value})
+func (prop *Property) AddParameter(parameter *Parameter) {
+	prop.parameters = append(prop.parameters, parameter)
+}
+
+func (prop *Property) Add(name Name, value Value) {
+	prop.AddParameter(&Parameter{name, value})
 }
 
 func NewProperty(name Name, value Value) Property {
@@ -192,8 +196,8 @@ func NewProperty(name Name, value Value) Property {
 
 type Component struct {
 	name Name
-	properties []Property
-	components []Component
+	properties []*Property
+	components []*Component
 }
 
 func (c *Component) String() string {
@@ -212,20 +216,22 @@ func (c *Component) SetName(name string) {
 	c.name = Name(name)
 }
 
-func (c *Component) Add(name Name, value Value) {
-	c.properties = append(c.properties, Property{name: name, value: value})
-}
-
-func (c *Component) Set(name Name, value Value) {
-	c.Add(name, value)			// TODO: remove duplicates
-}
-
-func (c *Component) AddProperty(prop Property) {
+func (c *Component) AddProperty(prop *Property) {
 	c.properties = append(c.properties, prop)
 }
 
+func (c *Component) Add(name Name, value Value) *Property {
+	p := Property{name: name, value: value}
+	c.AddProperty(&p)
+	return &p
+}
+
+func (c *Component) Set(name Name, value Value) *Property {
+	return c.Add(name, value)			// TODO: remove duplicates
+}
+
 func (c *Component) AddComponent(subc *Component) {
-	c.components = append(c.components, *subc)
+	c.components = append(c.components, subc)
 }
 
 func (c *Component) ComponentCount() int {
